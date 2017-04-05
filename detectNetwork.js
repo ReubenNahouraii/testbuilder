@@ -4,35 +4,61 @@
 // credit card object to hold all the credit card specifications
 let creditcards =
 {
-  americanExpress : {
-    name : "American Express",
-    startingDigits : [34, 37],
-    length : [15]
+  cards :
+  {
+    americanExpress : {
+      name : "American Express",
+      prefix : [34, 37],
+      length : [15]
+    },
+    dinersClub : {
+      name : "Diner's Club",
+      prefix : [38, 39],
+      length : [14]
+    },
+    visa : {
+      name : "Visa",
+      prefix : [4],
+      length : [13, 16, 19]
+    },
+    mastercard : {
+      name : "MasterCard",
+      prefix : [51, 52, 53, 54, 55],
+      length : [16]
+    },
+    discover : {
+      name : "Discover",
+      prefix : [65, 644, 645, 646, 647, 648, 649, 6011],
+      length : [16, 19]
+    },
+    maestro : {
+      name : "Maestro",
+      prefix : [5018, 5020, 5038, 6304],
+      length : [12, 13, 14, 15, 16, 17, 18, 19]
+    }
   },
-  dinersClub : {
-    name : "Diner's Club",
-    startingDigits : [38, 39],
-    length : [14]
-  },
-  visa : {
-    name : "Visa",
-    startingDigits : [4],
-    length : [13, 16, 19]
-  },
-  mastercard : {
-    name : "MasterCard",
-    startingDigits : [51, 52, 53, 54, 55],
-    length : [16]
+  getMaxLength : function() {
+    let max = 0
+    for(card in this.cards)
+    {
+      let cardObj = this.cards[card]
+      for(let i = 0; i < cardObj.length.length; i++)
+        max = cardObj.length[i] > max ? cardObj.length[i] : max
+    }
+    return max
   }
 }
 
 // checks the first two numbers of a given card to determine the network
-function checkStartingDigits(cardNumber, startingDigitsArray) {
-  // debugger
-  let endIndex = String(startingDigitsArray[0]).length;
-  for(let i = 0; i < startingDigitsArray.length; i++)
-    if(cardNumber.substring(0, endIndex) == startingDigitsArray[i])
+function checkPrefix(cardNumber, prefixArray) {
+  if(!cardNumber)
+    debugger
+  for(let i = 0; i < prefixArray.length; i++)
+  {
+    let endIndex = String(prefixArray[i]).length;
+    if(cardNumber.substring(0, endIndex) == prefixArray[i])
       return true
+  }
   return false
 }
 
@@ -46,12 +72,12 @@ function checkLength(cardNumber, lengthArray) {
 
 // searches for a credit card given a credit card number and credit card object
 function findCard(cardNumber) {
-  for(let card in this)
+  for(let card in this.cards)
   {
-    let cardObj = this[card]
+    let cardObj = this.cards[card]
     if
     (
-      checkStartingDigits(cardNumber, cardObj.startingDigits) &&
+      checkPrefix(cardNumber, cardObj.prefix) &&
       checkLength(cardNumber, cardObj.length)
     )
       return cardObj.name
