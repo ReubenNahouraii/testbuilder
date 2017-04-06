@@ -21,7 +21,7 @@ let creditcards =
       prefix : [4],
       length : [13, 16, 19]
     },
-    mastercard : {
+    masterCard : {
       name : "MasterCard",
       prefix : [51, 52, 53, 54, 55],
       length : [16]
@@ -35,6 +35,23 @@ let creditcards =
       name : "Maestro",
       prefix : [5018, 5020, 5038, 6304],
       length : [12, 13, 14, 15, 16, 17, 18, 19]
+    },
+    switchCard : {
+      name : "Switch",
+      prefix : [4903, 4905, 4911, 4936, 564182, 633110, 6333, 6759],
+      length : [16, 18, 19]
+    },
+    // China UnionPay always has a prefix of 622126-622925, 624-626, or 6282-6288 and a length of 16-19.
+    chinaUnionPay : {
+      name : "China UnionPay",
+      prefix : (function() {
+        return buildArray(
+               buildArray(
+               buildArray([], 622126, 622925),
+                                    624, 626),
+                                  6282, 6288)
+      })(),
+      length : [16, 17, 18, 19]
     }
   },
   getMaxLength : function() {
@@ -48,16 +65,19 @@ let creditcards =
     return max
   }
 }
-
+// fill array from (initial value) to (ending value, inclusive)
+function buildArray(array, from, to) {
+        for(let i = from; i <= to; i++)
+          array.push(i)
+        return array
+  }
 // checks the first two numbers of a given card to determine the network
 function checkPrefix(cardNumber, prefixArray) {
-  if(!cardNumber)
-    debugger
   for(let i = 0; i < prefixArray.length; i++)
   {
     let endIndex = String(prefixArray[i]).length;
     if(cardNumber.substring(0, endIndex) == prefixArray[i])
-      return true
+      return prefixArray[i]
   }
   return false
 }
@@ -71,18 +91,22 @@ function checkLength(cardNumber, lengthArray) {
 }
 
 // searches for a credit card given a credit card number and credit card object
+// if more than one matching prefix, returns card with largest number prefix
 function findCard(cardNumber) {
+  let maxPrefix = 0, currentPrefix, cardName
+
   for(let card in this.cards)
   {
     let cardObj = this.cards[card]
-    if
-    (
-      checkPrefix(cardNumber, cardObj.prefix) &&
-      checkLength(cardNumber, cardObj.length)
-    )
-      return cardObj.name
+    if((currentPrefix = checkPrefix(cardNumber, cardObj.prefix)) &&
+        checkLength(cardNumber, cardObj.length))
+          if(currentPrefix > maxPrefix)
+          {
+            cardName = cardObj.name
+            maxPrefix = currentPrefix
+          }
   }
-  return 'Card Not Found'
+  return maxPrefix ? cardName : 'Card Not Found'
 }
 
 // Given a credit card number, this function should return a string with the
